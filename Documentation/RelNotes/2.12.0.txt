@@ -105,6 +105,8 @@ Changes since v2.11.0
   are additional characters before the "leading" tabs that should
   count as an additional, but very short tab-stop.  #3185
 
+* Added command `magit-browse-pull-request'.
+
 Fixes since v2.11.0
 -------------------
 
