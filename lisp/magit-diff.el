@@ -853,7 +853,7 @@ a commit read from the minibuffer."
   (magit-diff-setup nil nil args files))
 
 ;;;###autoload
-(defun magit-diff-while-committing (&optional args files)
+(defun magit-diff-while-committing (&optional args)
   "While committing, show the changes that are about to be committed.
 While amending, invoking the command again toggles between
 showing just the new changes or all the changes that will
@@ -865,24 +865,24 @@ be committed."
             (pcase-let ((`(,rev ,arg . ,_) magit-refresh-args))
               (cond ((and (equal rev "HEAD^")
                           (equal arg '("--cached")))
-                     (magit-diff-staged nil args files))
+                     (magit-diff-staged nil args))
                     ((and (equal rev nil)
                           (equal arg '("--cached")))
-                     (magit-diff-while-amending args files))
+                     (magit-diff-while-amending args))
                     ((magit-anything-staged-p)
-                     (magit-diff-staged nil args files))
+                     (magit-diff-staged nil args))
                     (t
-                     (magit-diff-while-amending args files)))))
+                     (magit-diff-while-amending args)))))
         (if (magit-anything-staged-p)
-            (magit-diff-staged nil args files)
-          (magit-diff-while-amending args files)))
+            (magit-diff-staged nil args)
+          (magit-diff-while-amending args)))
     (user-error "No commit in progress")))
 
 (define-key git-commit-mode-map
   (kbd "C-c C-d") 'magit-diff-while-committing)
 
-(defun magit-diff-while-amending (&optional args files)
-  (magit-diff-setup "HEAD^" (list "--cached") args files))
+(defun magit-diff-while-amending (&optional args)
+  (magit-diff-setup "HEAD^" (list "--cached") args))
 
 ;;;###autoload
 (defun magit-diff-buffer-file ()
