@@ -859,22 +859,24 @@ While amending, invoking the command again toggles between
 showing just the new changes or all the changes that will
 be committed."
   (interactive (magit-diff-arguments))
-  (let ((toplevel (magit-toplevel))
-        (diff-buf (magit-mode-get-buffer 'magit-diff-mode)))
-    (if (magit-commit-message-buffer)
-        (if (and (or ;; most likely an explicit amend
-                     (not (magit-anything-staged-p))
-                     ;; explicitly toggled from within diff
-                     (and (eq (current-buffer) diff-buf)))
-                 (or (not diff-buf)
-                     (with-current-buffer diff-buf
-                       (or ;; default to include last commit
-                           (not (equal (magit-toplevel) toplevel))
-                           ;; toggle to include last commit
-                           (not (car magit-refresh-args))))))
-            (magit-diff-while-amending args files)
-          (magit-diff-staged nil args files))
-      (user-error "No commit in progress"))))
+  (if (magit-commit-message-buffer)
+      (-if-let ((diff-buf (magit-mode-get-buffer 'magit-diff-mode)))
+          (with-current-buffer diff-buf
+            (pcase-let ((`(,rev ,arg . ,_) magit-refresh-args))
+              (cond ((and (equal rev "HEAD^")
+                          (equal arg '("--cached")))
+                     (magit-diff-staged nil args files))
+                    ((and (equal rev nil)
+                          (equal arg '("--cached")))
+                     (magit-diff-while-amending args files))
+                    ((magit-anything-staged-p)
+                     (magit-diff-staged nil args files))
+                    (t
+                     (magit-diff-while-amending args files)))))
+        (if (magit-anything-staged-p)
+            (magit-diff-staged nil args files)
+          (magit-diff-while-amending args files)))
+    (user-error "No commit in progress")))
 
 (define-key git-commit-mode-map
   (kbd "C-c C-d") 'magit-diff-while-committing)

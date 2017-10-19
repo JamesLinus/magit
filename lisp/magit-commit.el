@@ -349,7 +349,9 @@ depending on the value of option `magit-commit-squash-confirm'."
                         ((magit-commit-amend
                           magit-commit-reword
                           magit-rebase-reword-commit)
-                         'magit-diff-while-amending))))
+                         'magit-diff-while-amending)
+                        (t
+                         'magit-diff-while-committing))))
     (-when-let (diff-buffer (magit-mode-get-buffer 'magit-diff-mode))
       ;; This window just started displaying the commit message
       ;; buffer.  Without this that buffer would immediately be
