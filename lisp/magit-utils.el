@@ -286,8 +286,9 @@ and delay of your graphical environment or operating system."
 
 (defvar magit-completing-read--silent-default nil)
 
-(defun magit-completing-read
-    (prompt collection &optional predicate require-match initial-input hist def)
+(defun magit-completing-read (prompt collection &optional
+                                     predicate require-match initial-input
+                                     hist def 2th-def)
   "Magit wrapper around `completing-read' or an alternative function.
 
 Option `magit-completing-read-function' can be used to wrap
@@ -332,6 +333,8 @@ results in additional differences."
             (user-error "Abort"))
         (setq magit-completing-read--silent-default t)
         def)
+    (unless def
+      (setq def 2th-def))
     (let ((reply (funcall magit-completing-read-function
                           (concat prompt ": ")
                           (if (and def (not (member def collection)))
