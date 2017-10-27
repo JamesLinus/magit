@@ -76,7 +76,11 @@ or `helm--completing-read-default'."
 
 (defvar magit-no-confirm-default nil)
 
-(defcustom magit-dwim-selection nil
+(defcustom magit-dwim-selection
+  '((magit-stash-apply  nil t)
+    (magit-stash-branch nil t)
+    (magit-stash-drop   nil nil)
+    (magit-stash-pop    nil t))
   "TODO Control which commands offer alternatives and require confirmation.
 Format ((COMMAND {nil(1)|PROMPT-REGEXP(2)} {t(3)|ask})...).
 (1) for all prompts of command (bad idea if more than one)

@@ -198,7 +198,7 @@ while two prefix arguments are equivalent to `--all'."
   "Apply a stash to the working tree.
 Try to preserve the stash index.  If that fails because there
 are staged changes, apply without preserving the stash index."
-  (interactive (list (magit-read-stash "Apply stash" t)))
+  (interactive (list (magit-read-stash "Apply stash")))
   (if (= (magit-call-git "stash" "apply" "--index" stash) 0)
       (magit-refresh)
     (magit-run-git "stash" "apply" stash)))
@@ -208,7 +208,7 @@ are staged changes, apply without preserving the stash index."
 Try to preserve the stash index.  If that fails because there
 are staged changes, apply without preserving the stash index
 and forgo removing the stash."
-  (interactive (list (magit-read-stash "Pop stash" t)))
+  (interactive (list (magit-read-stash "Pop stash")))
   (if (= (magit-call-git "stash" "apply" "--index" stash) 0)
       (magit-stash-drop stash)
     (magit-run-git "stash" "apply" stash)))
@@ -249,7 +249,7 @@ When the region is active offer to drop all contained stashes."
 ;;;###autoload
 (defun magit-stash-branch (stash branch)
   "Create and checkout a new BRANCH from STASH."
-  (interactive (list (magit-read-stash "Branch stash" t)
+  (interactive (list (magit-read-stash "Branch stash")
                      (magit-read-string-ns "Branch name")))
   (magit-run-git "stash" "branch" branch stash))
 
