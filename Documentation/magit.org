@@ -1191,6 +1191,21 @@ on the value of ~magit-use-sticky-arguments~.
 
 ** Completion and Confirmation
 
+- TODO reorganize this, maybe using subsections
+- TODO adapt for end-users
+
+Dangerous operations that may lead to data loss have to be confirmed
+by default.  With a multi-section selection, this is done using
+questions that can be answered with "yes" or "no".  When the region isn't
+active, or if it doesn't constitute a valid section selection, then
+such commands instead read a single item in the minibuffer.  When the
+value of the current section is among the possible choices, then that
+is presented as default choice.  To confirm the action on a single
+item, the user has to answer ~RET~ (instead of "yes"), and to abort, ~C-g~
+(instead of "no").  But alternatively the user may also select another
+item, just like if the command had been invoked with no suitable
+section at point at all.
+
 Many commands read a value from the user.  By default this is done
 using the built-in function ~completing-read~, but Magit can instead use
 another completion framework.
@@ -1203,6 +1218,9 @@ another completion framework.
   because Magit expects them to add the default choice to the prompt
   themselves, such functions should not be used directly.  Instead a
   wrapper function has to be used.
+
+TODO Helm and Ivy are also supported but should leave this option
+alone.
 
 Currently only the real ~completing-read~ and [[http://www.emacswiki.org/emacs/InteractivelyDoThings][Ido]] are fully supported.
 More frameworks will be supported in the future.
@@ -6540,19 +6558,9 @@ where ~*~ may be something like ~diff~) with the value of
   of this variable and then calling this ~magit-refresh-function~.
 
 ** Conventions
-*** Confirmation and Completion
+*** _ :ignore:
 
-Dangerous operations that may lead to data loss have to be confirmed
-by default.  With a multi-section selection, this is done using
-questions that can be answered with "yes" or "no".  When the region isn't
-active, or if it doesn't constitute a valid section selection, then
-such commands instead read a single item in the minibuffer.  When the
-value of the current section is among the possible choices, then that
-is presented as default choice.  To confirm the action on a single
-item, the user has to answer ~RET~ (instead of "yes"), and to abort, ~C-g~
-(instead of "no").  But alternatively the user may also select another
-item, just like if the command had been invoked with no suitable
-section at point at all.
+Also see [[*Completion and Confirmation]].
 
 *** Theming Faces
 

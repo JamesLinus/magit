@@ -74,33 +74,17 @@ or `helm--completing-read-default'."
                 (function-item helm--completing-read-default)
                 (function :tag "Other function")))
 
-(defcustom magit-no-confirm-default nil
-  "A list of commands which should just use the default choice.
+(defvar magit-no-confirm-default nil)
 
-Many commands let the user choose the target they act on offering
-a sensible default as default choice.  If you think that that
-default is so sensible that it should always be used without even
-offering other choices, then add that command here.
-
-Commands have to explicitly support this option.  Currently only
-these commands do:
-  `magit-branch'
-  `magit-branch-and-checkout'
-  `magit-branch-orphan'
-  `magit-worktree-branch'
-    For these four commands `magit-branch-read-upstream-first'
-    must be non-nil, or adding them here has no effect.
-  `magit-branch-rename'
-  `magit-tag'"
-  :package-version '(magit . "2.9.0")
+(defcustom magit-dwim-selection nil
+  "TODO Control which commands offer alternatives and require confirmation.
+Format ((COMMAND {nil(1)|PROMPT-REGEXP(2)} {t(3)|ask})...).
+(1) for all prompts of command (bad idea if more than one)
+(2) don't match trailing \": "" or \" (default VALUE): \"
+(3) use without asking"
+  :package-version '(magit . "2.12.0")
   :group 'magit-commands
-  :type '(list :convert-widget custom-hook-convert-widget)
-  :options '(magit-branch
-             magit-branch-and-checkout
-             magit-branch-orphan
-             magit-branch-rename
-             magit-worktree-branch
-             magit-tag))
+  :type 'sexp) ; TODO
 
 (defconst magit--confirm-actions
   '((const reverse)           (const discard)
@@ -300,6 +284,8 @@ and delay of your graphical environment or operating system."
 
 ;;; User Input
 
+(defvar magit-completing-read--silent-default nil)
+
 (defun magit-completing-read
     (prompt collection &optional predicate require-match initial-input hist def)
   "Magit wrapper around `completing-read' or an alternative function.
@@ -325,20 +311,39 @@ that this wrapper makes the following changes:
   uses `magit-prompt-with-completion' and DEF is non-nil, then
   PROMPT is modified to end with \" (default DEF): \".
 
+- TODO talk about `magit-dwim-selection'
+  and `magit-completing-read--silent-default'.
+
 The use of another completing function and/or wrapper obviously
 results in additional differences."
-  (let ((reply (funcall magit-completing-read-function
-                        (concat prompt ": ")
-                        (if (and def (not (member def collection)))
-                            (cons def collection)
-                          collection)
-                        predicate
-                        require-match initial-input hist def)))
-    (if (string= reply "")
-        (if require-match
-            (user-error "Nothing selected")
-          nil)
-      reply)))
+  (setq magit-completing-read--used-default nil)
+  (-if-let (dwim (and def
+                      (or (-keep (pcase-lambda (`(,cmd ,re ,how))
+                                   (and (eq this-command cmd)
+                                        (or (not re) (string-match-p re prompt))
+                                        how))
+                                 magit-dwim-selection)
+                          ;; TODO The behavior isn't exactly the same,
+                          ;; so we probably shouldn't do this.
+                          (memq this-command magit-no-confirm-default))))
+      (if (eq dwim 'ask)
+          (if (y-or-n-p (format "%s %s? " prompt def))
+              def
+            (user-error "Abort"))
+        (setq magit-completing-read--silent-default t)
+        def)
+    (let ((reply (funcall magit-completing-read-function
+                          (concat prompt ": ")
+                          (if (and def (not (member def collection)))
+                              (cons def collection)
+                            collection)
+                          predicate
+                          require-match initial-input hist def)))
+      (if (string= reply "")
+          (if require-match
+              (user-error "Nothing selected")
+            nil)
+        reply))))
 
 (defun magit--completion-table (collection)
   (lambda (string pred action)
